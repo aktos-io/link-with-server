@@ -205,7 +205,7 @@ is_link_working() {
 get_ssh_id_fingerprint() {
 
   ccalog "get_ssh_id_fingerprint"
-  local FINGERPRINT="$(ssh-keygen -lf "$SSH_ID_FILE" | awk '{print $2}') | sed 's/^MD5:\(.*\)$/\1/'"
+  local FINGERPRINT="$(ssh-keygen -E md5 -lf "$SSH_ID_FILE" | awk '{print $2}' | sed 's/^MD5:\(.*\)$/\1/')"
   echo $FINGERPRINT
 }
 
