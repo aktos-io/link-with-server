@@ -185,10 +185,6 @@ function generate_ssh_id {
 	fi
 }
 
-is_socket_working() {
-  run_ssh_command exit 0
-  return $?
-}
 
 is_link_working() {
   #ssh $PROXY_USERNAME@$PROXY_HOST -p $PROXY_SSHD_PORT \
@@ -372,15 +368,6 @@ else
     echolog "Tunnel seems working..."
   else
     echolog "Connection is broken, creating a new tunnel."
-
-    # --------------------------------- #
-    # BEGIN: testing another algorithm:
-    is_socket_working
-    if [[ $? == 0 ]]; then
-      echolog "IS_SOCKET_WORKING FUNCTION WORKS IN A WRONG WAY!!!"
-    fi
-    # END: testing another algorithm:
-    # --------------------------------- #
 
     # create tunnel
     createTunnel
