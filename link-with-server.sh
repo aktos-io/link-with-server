@@ -308,7 +308,7 @@ fi
 
 
 croncmd=$SCRIPT_PATH
-cronjob="*/2 * * * *  60s bash \"$croncmd\""
+cronjob="*/2 * * * * timeout 60s bash \"$croncmd\""
 
 if [[ $1 == "install" ]]; then
   echolog "This script will be registered to cron jobs"
