@@ -62,15 +62,8 @@ create_ssh_socket() {
 createTunnel() {
 
   run_ssh_command -o ExitOnForwardFailure=yes \
-	-R$MOBMAC_SSHD_PORT_ON_PROXY:localhost:$MOBMAC_SSHD_PORT
+	-R $MOBMAC_SSHD_PORT_ON_PROXY:localhost:$MOBMAC_SSHD_PORT
 
-  #ssh -i "$SSH_ID_FILE" -o PasswordAuthentication=no  -f -N \
- #	-M -S $MONITOR_SOCKET_ON_MOBMAC -o ExitOnForwardFailure=yes  \
-#	-R$MOBMAC_SSHD_PORT_ON_PROXY:localhost:$MOBMAC_SSHD_PORT \
-#	$SSH_COMMON \
-#	$PROXY_USERNAME@$PROXY_HOST -p $PROXY_SSHD_PORT
-#	#-L$MONITOR_PORT_ON_MOBMAC:$PROXY_HOST:$PROXY_SSHD_PORT \
-#	#$PROXY_USERNAME@$PROXY_HOST
     if [[ $? -eq 0 ]]; then
         echolog "Tunnel to $PROXY_HOST created successfully"
     else
