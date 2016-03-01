@@ -81,6 +81,12 @@ function echolog {
   ccalog $MESSAGE
 }
 
+limit_log_file() {
+  local TMP="$LOG_FILE.TMP"
+  tail -c $LOG_FILE_SIZE_LIMIT "$LOG_FILE" > "$TMP"
+  mv "$TMP" "$LOG_FILE"
+}
+
 ccalog() {
   local PARAMS=$*
   local INPUT
@@ -89,15 +95,15 @@ ccalog() {
   else
     INPUT="$PARAMS"
   fi
-  #echo $INPUT | tee -a "$LOG_FILE" > /dev/null
-  echo $INPUT >> "$LOG_FILE"
+
+  # enable/disable logging here 
+  if false; then 
+      #echo $INPUT | tee -a "$LOG_FILE" > /dev/null
+      echo $INPUT >> "$LOG_FILE"
+      limit_log_file
+  fi
 }
 
-limit_log_file() {
-  local TMP="$LOG_FILE.TMP"
-  tail -c $LOG_FILE_SIZE_LIMIT "$LOG_FILE" > "$TMP"
-  mv "$TMP" "$LOG_FILE"
-}
 
 
 function register_ssh_id {
@@ -372,5 +378,3 @@ else
 
 fi
 
-limit_log_file
-echolog "Log file is truncated to $LOG_FILE_SIZE_LIMIT"
