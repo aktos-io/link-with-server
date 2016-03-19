@@ -3,7 +3,7 @@
 
 proxy_settings() {
 	PROXY_USERNAME="mobmac_user"
-	PROXY_HOST="aktos-elektronik.com"
+	PROXY_HOST="aktos.io"
 	PROXY_SSHD_PORT=443
 }
 
