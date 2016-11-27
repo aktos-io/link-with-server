@@ -307,7 +307,7 @@ fi
 
 
 croncmd=$SCRIPT_PATH
-cronjob="*/2 * * * * timeout 60s bash \"$croncmd\""
+cronjob="*/5 * * * * timeout 180s bash \"$croncmd\""
 
 if [[ $1 == "install" ]]; then
   echolog "This script will be registered to cron jobs"
@@ -333,7 +333,7 @@ generate_ssh_id "$SSH_ID_FILE"
 
 # check connectivity to the server
 #echo -n "Checking connectivity to the server: "
-echolog "Checking server connectivity"
+echolog "Checking server ($PROXY_HOST) connectivity"
 ping -c 1 $PROXY_HOST &> /dev/null
 
 echolog "Connection Checking Disabled!"
