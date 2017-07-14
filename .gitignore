@@ -1,5 +1,4 @@
 *.log
 ssh_keys
 mobmac-conf.sh
-.bzr
-.bzrignore
+
