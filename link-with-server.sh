@@ -12,24 +12,18 @@ set_dir
 safe_source $DIR/aktos-bash-lib/basic-functions.sh
 safe_source $DIR/aktos-bash-lib/ssh-functions.sh
 
-SSH_USER="mobmac_user"
+SSH_USER="mobmac2"
 SSH_HOST="aktos.io"
 SSH_PORT=443
-SSH_KEY_FILE="$DIR/ssh_keys/test_id"
+#SSH_KEY_FILE="$DIR/ssh_keys/test_id"
+SSH_KEY_FILE="$HOME/.ssh/id_rsa"
 
 RENDEZVOUS_SSHD_PORT=7100
 
 
 start_port_forwarding () {
-    jobs &>/dev/null
-    ssh_id_command -N -L -R $RENDEZVOUS_SSHD_PORT:localhost:22 -L $RENDEZVOUS_SSHD_PORT:localhost:2222 &
-    new_job_started="$(jobs -n)"
-    if [ -n "$new_job_started" ];then
-        port_forward_pid=$!
-    else
-        port_forward_pid=
-    fi
-    echo $port_forward_pid
+    echo "starting ssh"
+    ssh_id_command -N -R $RENDEZVOUS_SSHD_PORT:localhost:22 -L $RENDEZVOUS_SSHD_PORT:localhost:2222 -L 4000:localhost:4000 
 }
 
 is_port_forward_working () {
@@ -44,6 +38,7 @@ is_port_forward_working () {
 }
 
 echo "starting port forward"
+start_port_forwarding
 port_forward_pid=$(start_port_forwarding)
 
 echo "checking if port forwarding is working"
