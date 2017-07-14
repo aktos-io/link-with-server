@@ -20,23 +20,37 @@ SSH_KEY_FILE="$HOME/.ssh/id_rsa"
 
 RENDEZVOUS_SSHD_PORT=7100
 
-
+ssh_pid=
+ssh_monitor_pid=
 start_port_forwarding () {
     echo "starting ssh"
+    # DONT USE -f OPTION, $ssh_pid is changing after a few seconds otherwise.
     $SSH $SSH_USER@$SSH_HOST -p $SSH_PORT -i $SSH_KEY_FILE \
         -N -R $RENDEZVOUS_SSHD_PORT:localhost:22 \
-        -L $RENDEZVOUS_SSHD_PORT:localhost:2222 \
-        -L 4000:localhost:4000 -f &
+        -L 2222:localhost:$RENDEZVOUS_SSHD_PORT \
+        -L 4000:localhost:4000 &
+    ssh_pid=$!
 }
 
 is_port_forward_working () {
-    orig_pubkey=$(ssh-keyscan localhost -p 22 2> /dev/null)
-    forwarded_pubkey=$(ssh-keyscan localhost -p 2222 2> /dev/null)
+    # maybe we could try something like `ssh localhost -p 2222 exit 0`
+    # in the future
+    local nc_timeout=10
+    local proxied=$(echo | timeout $nc_timeout nc localhost 2222 2> /dev/null)
+    local orig=$(echo | timeout $nc_timeout nc localhost 22 2> /dev/null)
 
-    if [[ "$orig_pubkey" == "$forwarded_pubkey" ]]; then
-        return 0
+    #echo "proxied: $proxied, orig: $orig"
+    if [[ "$proxied" == "" ]]; then
+        #echo "no answer, tunnel is broken."
+        return 55
     else
-        return 1
+        if [[ "$proxied" == "$orig" ]]; then
+            #echo "tunnel is working."
+            return 0
+        else
+            #echo "ssh server responses differs!"
+            return 1
+        fi
     fi
 }
 
@@ -52,23 +66,41 @@ cleanup () {
 
 trap cleanup EXIT
 
-echo "starting port forward"
-start_port_forwarding
-ssh_pid=$!
-echo "..........is it started? $ssh_pid"
+reconnect () {
+    start_port_forwarding
+    echo "starting port forward (pid: $ssh_pid)"
 
+    echo "checking if port forward works"
+    for max_retry in {60..1}; do
+        if ! is_port_forward_working; then
+            #echo_yellow "!! Broken port forward !! retry: $max_retry"
+            echo -n "."
+        else
+            echo_green "Port forward is working"
+            return 0
+        fi
+        sleep 1s
+    done
+    return 1
+}
 
-echo "checking if port forwarding is working"
-
-sleep 100
-exit
 while :; do
-    if is_port_forward_working; then
-        echo_green "Port forward is working"
+    echo "trying to reconnect..."
+    reconnect
+    if [ $? == 0 ]; then
+        echo "waiting for tunnel to break..."
     else
-        echo_yellow "We need to install key."
+        echo ".... tunnel can not be established already."
     fi
-    sleep 2s
+    while :; do
+        if ! is_port_forward_working; then
+            break
+        fi
+        sleep 5
+    done
+    echo "tunnel seems broken."
+    cleanup
+    sleep 2
 done
 
 exit
