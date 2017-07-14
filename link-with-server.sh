@@ -5,9 +5,58 @@
 
 # Use "help" as an argument to get usage
 
+set_dir () { DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"; }
+safe_source () { source $1; set_dir; }
+set_dir
+
+safe_source $DIR/aktos-bash-lib/basic-functions.sh
+safe_source $DIR/aktos-bash-lib/ssh-functions.sh
+
+SSH_USER="mobmac_user"
+SSH_HOST="aktos.io"
+SSH_PORT=443
+SSH_KEY_FILE="$DIR/ssh_keys/test_id"
+
+RENDEZVOUS_SSHD_PORT=7100
 
 
+start_port_forwarding () {
+    jobs &>/dev/null
+    ssh_id_command -N -L -R $RENDEZVOUS_SSHD_PORT:localhost:22 -L $RENDEZVOUS_SSHD_PORT:localhost:2222 &
+    new_job_started="$(jobs -n)"
+    if [ -n "$new_job_started" ];then
+        port_forward_pid=$!
+    else
+        port_forward_pid=
+    fi
+    echo $port_forward_pid
+}
 
+is_port_forward_working () {
+    orig_pubkey=$(ssh-keyscan localhost -p 22 2> /dev/null)
+    forwarded_pubkey=$(ssh-keyscan localhost -p 2222 2> /dev/null)
+
+    if [[ "$orig_pubkey" == "$forwarded_pubkey" ]]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+echo "starting port forward"
+port_forward_pid=$(start_port_forwarding)
+
+echo "checking if port forwarding is working"
+while :; do
+    if is_port_forward_working; then
+        echo_green "Port forward is working"
+    else
+        echo_yellow "We need to install key."
+    fi
+    sleep 2s
+done
+
+exit
 # ------------------------- LIBRARY FUNCTIONS ----------------------------------- #
 #SSH_COMMON="-F /dev/null -o ServerAliveCountMax=5 -o ServerAliveInterval=3 -o ConnectTimeout=10 -o ConnectionAttempts=2 -o BatchMode=yes"
 SSH_COMMON="-o AddressFamily=inet"
@@ -194,9 +243,9 @@ is_link_working() {
 get_ssh_id_fingerprint() {
 
   ccalog "get_ssh_id_fingerprint"
-  local FINGERPRINT="$(ssh-keygen -E md5 -lf "$SSH_ID_FILE" 2> /dev/null | awk '{print $2}' | sed 's/^MD5:\(.*\)$/\1/')" 
-  
-  if [[ "$FINGERPRINT" == "" ]]; then 
+  local FINGERPRINT="$(ssh-keygen -E md5 -lf "$SSH_ID_FILE" 2> /dev/null | awk '{print $2}' | sed 's/^MD5:\(.*\)$/\1/')"
+
+  if [[ "$FINGERPRINT" == "" ]]; then
     FINGERPRINT="$(ssh-keygen -lf "$SSH_ID_FILE" | awk '{print $2}')"
   fi
   echo $FINGERPRINT
