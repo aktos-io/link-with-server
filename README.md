@@ -17,7 +17,7 @@ Creates a link between the NODE and the RENDEZVOUS SERVER.
 
 4. Restart sshd on server:
 
-      sudo /etc/init.d/ssh restart
+        sudo /etc/init.d/ssh restart
 
 5. Place any server side programs in `/home/forward` folder and start on system startup
 
@@ -34,3 +34,17 @@ Creates a link between the NODE and the RENDEZVOUS SERVER.
     >
     >     nohup /path/to/link-with-server.sh &
     >
+    
+    
+# Usage 
+
+1. Run `./link-with-server.sh` to create a link with server. 
+
+    > When "tunnel is established", the `RENDEZVOUS_SSHD_PORT` on server 
+    > is representing the ssh port (22) of the NODE. 
+    
+2. If you have any scripts to run on connection, place them under `on-connect` folder. 
+3. If you have any scripts to run on disconnection, place them under `on-disconnect` folder. 
+
+
+
