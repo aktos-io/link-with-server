@@ -24,7 +24,7 @@ Creates a link between the NODE and the RENDEZVOUS SERVER.
 
 # Setup per Node
 
-1. Copy your node's public key to `/home/forward/.ssh/authorized_keys` in your favourite way.
+1. Copy your node's public key to `/home/forward/.ssh/authorized_keys` on RENDEZVOUS_SERVER in your favourite way.
 2. Setup your configuration file.
 3. Setup to run `link-with-server.sh` on startup on node.
 
