@@ -23,7 +23,10 @@ RENDEZVOUS_SSHD_PORT=7100
 
 start_port_forwarding () {
     echo "starting ssh"
-    ssh_id_command -N -R $RENDEZVOUS_SSHD_PORT:localhost:22 -L $RENDEZVOUS_SSHD_PORT:localhost:2222 -L 4000:localhost:4000 
+    $SSH $SSH_USER@$SSH_HOST -p $SSH_PORT -i $SSH_KEY_FILE \
+        -N -R $RENDEZVOUS_SSHD_PORT:localhost:22 \
+        -L $RENDEZVOUS_SSHD_PORT:localhost:2222 \
+        -L 4000:localhost:4000 -f &
 }
 
 is_port_forward_working () {
@@ -37,11 +40,28 @@ is_port_forward_working () {
     fi
 }
 
+cleanup () {
+    echo "cleaning up..."
+    if [ $ssh_pid ]; then
+        echo "SSH pid found ($ssh_pid), killing."
+        kill $ssh_pid
+    else
+        echo "No SSH pid found. just exiting."
+    fi
+}
+
+trap cleanup EXIT
+
 echo "starting port forward"
 start_port_forwarding
-port_forward_pid=$(start_port_forwarding)
+ssh_pid=$!
+echo "..........is it started? $ssh_pid"
+
 
 echo "checking if port forwarding is working"
+
+sleep 100
+exit
 while :; do
     if is_port_forward_working; then
         echo_green "Port forward is working"
