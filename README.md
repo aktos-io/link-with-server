@@ -2,7 +2,7 @@
 
 Creates a link between the NODE and the RENDEZVOUS SERVER.
 
-# Setup on Server
+# Setup on Server (for the first time)
 
 1. Install OpenSSH server if not installed.
 2. Create a standard unix user account (say `forward`)
@@ -22,7 +22,7 @@ Creates a link between the NODE and the RENDEZVOUS SERVER.
 5. Place any server side programs in `/home/forward` folder and start on system startup
 
 
-# Setup per Node
+# Setup per Node (on every node deployment)
 
 1. Copy your node's public key to `/home/forward/.ssh/authorized_keys` on RENDEZVOUS_SERVER in your favourite way.
 2. Edit your configuration file (`./config.sh`).
