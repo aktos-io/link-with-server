@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Author : Cerem Cem ASLAN ceremcem@ceremcem.net
+# Author : Cerem Cem ASLAN cem@aktos.io
 # Date   : 30.05.2014
 
 # Use "help" as an argument to get usage
@@ -23,7 +23,6 @@ RENDEZVOUS_SSHD_PORT=7100
 ssh_pid=
 ssh_monitor_pid=
 start_port_forwarding () {
-    echo "starting ssh"
     # DONT USE -f OPTION, $ssh_pid is changing after a few seconds otherwise.
     $SSH $SSH_USER@$SSH_HOST -p $SSH_PORT -i $SSH_KEY_FILE \
         -N -R $RENDEZVOUS_SSHD_PORT:localhost:22 \
@@ -55,12 +54,10 @@ is_port_forward_working () {
 }
 
 cleanup () {
-    echo "cleaning up..."
+    #echo "cleaning up..."
     if [ $ssh_pid ]; then
-        echo "SSH pid found ($ssh_pid), killing."
-        kill $ssh_pid
-    else
-        echo "No SSH pid found. just exiting."
+        #echo "SSH pid found ($ssh_pid), killing."
+        kill $ssh_pid 2> /dev/null
     fi
 }
 
@@ -68,15 +65,14 @@ trap cleanup EXIT
 
 reconnect () {
     start_port_forwarding
-    echo "starting port forward (pid: $ssh_pid)"
-
-    echo "checking if port forward works"
+    echo -n $(echo_stamp "starting port forward (pid: $ssh_pid)")
     for max_retry in {60..1}; do
         if ! is_port_forward_working; then
             #echo_yellow "!! Broken port forward !! retry: $max_retry"
             echo -n "."
         else
-            echo_green "Port forward is working"
+            echo
+            echo_green $(echo_stamp "Port forward is working")
             return 0
         fi
         sleep 1s
@@ -84,13 +80,18 @@ reconnect () {
     return 1
 }
 
+echo_stamp () {
+  local MESSAGE="$(date +'%F %H:%M:%S') - $@"
+  echo $MESSAGE
+}
+
+
 while :; do
-    echo "trying to reconnect..."
     reconnect
     if [ $? == 0 ]; then
-        echo "waiting for tunnel to break..."
+        echo_stamp "waiting for tunnel to break..."
     else
-        echo ".... tunnel can not be established already."
+        echo_stamp ".... tunnel can not be established already."
     fi
     while :; do
         if ! is_port_forward_working; then
@@ -98,7 +99,7 @@ while :; do
         fi
         sleep 5
     done
-    echo "tunnel seems broken."
+    echo_stamp "tunnel seems broken. cleaning up, restarting process"
     cleanup
     sleep 2
 done
@@ -171,7 +172,7 @@ close_tunnel() {
 	ssh $PROXY_USERNAME@$PROXY_HOST $SSH_COMMON -S $MONITOR_SOCKET_ON_MOBMAC -O exit
 }
 
-function echolog {
+echo_stamp () {
   local MESSAGE="$(date +'%F %H:%M:%S') - $*"
   echo $MESSAGE
   ccalog $MESSAGE
