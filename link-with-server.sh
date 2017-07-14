@@ -6,24 +6,14 @@
 # Use "help" as an argument to get usage
 
 set_dir () { DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"; }
-safe_source () { source $1; set_dir; }
+safe_source () { source $1 2> /dev/null; x=$?; set_dir; return $x; }
 set_dir
 
 safe_source $DIR/aktos-bash-lib/basic-functions.sh
 safe_source $DIR/aktos-bash-lib/ssh-functions.sh
+safe_source $DIR/config.sh || die "Required config file (./config.sh)"
 
-SSH_USER="mobmac2"
-SSH_HOST="aktos.io"
-SSH_PORT=443
-#SSH_KEY_FILE="$DIR/ssh_keys/test_id"
-SSH_KEY_FILE="$HOME/.ssh/id_rsa"
-
-RENDEZVOUS_SSHD_PORT=7100
-
-get_socket_file () {
-    local SSH_SOCKET_FILE="/tmp/ssh-$SSH_USER@$SSH_HOST:$SSH_PORT.sock"
-    printf "%q" $SSH_SOCKET_FILE
-}
+SSH_SOCKET_FILE="/tmp/ssh-$SSH_USER@$SSH_HOST:$SSH_PORT.sock"
 
 ssh_pid=
 start_port_forwarding () {
@@ -31,12 +21,12 @@ start_port_forwarding () {
     $SSH $SSH_USER@$SSH_HOST -p $SSH_PORT -i $SSH_KEY_FILE -N \
         -R $RENDEZVOUS_SSHD_PORT:localhost:22 \
         -L 2222:localhost:$RENDEZVOUS_SSHD_PORT \
-        -M -S $(get_socket_file) &
+        -M -S $SSH_SOCKET_FILE &
     ssh_pid=$!
 }
 
 ssh_run_via_socket () {
-    $SSH -N -S $(get_socket_file) $SSH_HOST $@ &
+    $SSH -N -S $SSH_SOCKET_FILE $SSH_HOST $@ &
 }
 
 is_port_forward_working () {
@@ -94,7 +84,7 @@ echo_stamp () {
 }
 
 
-echo_green "using socket file: $(get_socket_file)"
+echo_green "using socket file: $SSH_SOCKET_FILE"
 while :; do
     reconnect
     if [ $? == 0 ]; then
