@@ -16,7 +16,8 @@ HELP
 
 get_port_pid () {
     local port=$1
-    lsof -t -i :$port
+    #lsof -t -i :$port
+    netstat -anp | grep :$port | grep -i listen | grep "^tcp " | awk '{print $7}' | cut -d/ -f1
 }
 
 i=0
