@@ -24,22 +24,23 @@ Creates a link between the NODE and the RENDEZVOUS SERVER.
 
 # Setup per Node (on every node deployment)
 
-1. Clone this repository into NODE: 
+1. Clone this repository: 
 
        git clone https://github.com/aktos-io/link-with-server --init --recursive 
 
-2. Create public/private key pair on NODE: 
+2. Create public/private key pair: 
 
        ssh-keygen -t rsa -b 4096 -C "your_email@example.com"
 
-2. Copy your node's public key to `/home/forward/.ssh/authorized_keys` on RENDEZVOUS_SERVER in your favourite way.
+3. Copy your node's public key to `/home/forward/.ssh/authorized_keys` file on RENDEZVOUS_SERVER in your favourite way.
 
         # Basically, just copy and paste your public key: 
         $ cat ~/.ssh/id_rsa.pub
         ....your public key to select, copy and paste into authorized_keys...
         
-3. Edit your configuration file (`./config.sh`).
-4. Make `link-with-server.sh` run on startup on NODE.
+4. Edit the configuration file (`./config.sh`).
+
+5. Make `link-with-server.sh` run on startup.
 
     > Running this script in background is your responsibility.
     > Preferred way is running with `aktos-io/service-runner`
