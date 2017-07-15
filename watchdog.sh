@@ -20,24 +20,35 @@ get_port_pid () {
     netstat -anp | grep :$port | grep -i listen | grep "^tcp " | awk '{print $7}' | cut -d/ -f1
 }
 
-i=0
-while :; do 
+connected=
+connected0=
+first_run=true
+while :; do
   #echo "checking process for port $port"
   pid=$(get_port_pid $port)
   if [[ $pid != "" ]]; then     
-    #echo "checking if port is responding...$((i++))"
-
     sshd_heartbeat=$(echo | timeout 10 nc localhost $port 2> /dev/null)
     if [[ "$sshd_heartbeat" == "" ]]; then 
-      echo "can not connect to $port, killing the process (pid: $pid)"
+      echo "port $port is not responding, killing its process (pid: $pid)"
       kill $pid
-      echo "killed."
+      connected=
     else
-      echo "...port $port works OK (pid: $pid) heartbeat: $((i++))"
+      connected=true
+      if [ ! $connected0 ] && [ $connected ]; then
+	 echo "...port $port works OK (pid: $pid)"
+      fi
     fi 
   else 
-    echo "@@@ no process listening port: $port"
+    connected=
+    if [ $connected0 ] && [ ! $connected ]; then
+      echo "@@@ no process listening port: $port"
+    fi
+    if [[ $first_run ]]; then 
+      echo "First report: no process listening port $port"
+    fi
   fi 
   sleep 2
+  connected0=$connected
+  first_run=
 done
 
