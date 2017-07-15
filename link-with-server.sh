@@ -1,9 +1,6 @@
 #!/bin/bash
-
 # Author : Cerem Cem ASLAN cem@aktos.io
 # Date   : 30.05.2014
-
-# Use "help" as an argument to get usage
 
 set_dir () { DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"; }
 safe_source () { source $1 2> /dev/null; x=$?; set_dir; return $x; }
@@ -12,6 +9,7 @@ set_dir
 safe_source $DIR/aktos-bash-lib/basic-functions.sh
 safe_source $DIR/aktos-bash-lib/ssh-functions.sh
 safe_source $DIR/config.sh || die "Required config file (./config.sh)"
+safe_source $DIR/app-lib.sh 
 
 SSH_SOCKET_FILE="/tmp/ssh-$SSH_USER@$SSH_HOST:$SSH_PORT.sock"
 
@@ -51,16 +49,6 @@ is_port_forward_working () {
     fi
 }
 
-cleanup () {
-    echo_stamp "cleaning up..."
-    if [ $ssh_pid ]; then
-        #echo "SSH pid found ($ssh_pid), killing."
-        kill $ssh_pid 2> /dev/null
-    fi
-}
-
-trap cleanup EXIT
-
 reconnect () {
     start_port_forwarding
     echo -n $(echo_stamp "starting port forward (pid: $ssh_pid)")
@@ -78,11 +66,18 @@ reconnect () {
     return 1
 }
 
-echo_stamp () {
-  local MESSAGE="$(date +'%F %H:%M:%S') - $@"
-  echo $MESSAGE
+cleanup () {
+    echo_stamp "cleaning up..."
+    if [ $ssh_pid ]; then
+        #echo "SSH pid found ($ssh_pid), killing."
+        kill $ssh_pid 2> /dev/null
+    fi
 }
 
+
+# ------------------------- APPLICATION --------------------------------- #
+
+trap cleanup EXIT
 
 echo_green "using socket file: $SSH_SOCKET_FILE"
 while :; do
@@ -113,33 +108,3 @@ while :; do
     echo_stamp "reconnecting in $reconnect_delay seconds..."
     sleep $reconnect_delay
 done
-
-
-generate_ssh_id () {
-	# usage:
-	#   generate_ssh_id /path/to/ssh_id_file
-	local SSH_ID_FILE=$1
-	local SSH_ID_DIR=$(dirname "$SSH_ID_FILE")
-
-	#debug
-	#echo "SSH ID FILE: $SSH_ID_FILE"
-	#echo "DIRNAME: $SSH_ID_DIR"
-	#exit
-
-	if [ ! -f "$SSH_ID_FILE" ]; then
-		echolog "Generating SSH ID Key..."
-		mkdir -p "$SSH_ID_DIR"
-		ssh-keygen -N "" -f "$SSH_ID_FILE"
-	else
-		echolog "SSH ID Key exists, continue..."
-	fi
-}
-
-
-get_ssh_id_fingerprint() {
-  local FINGERPRINT="$(ssh-keygen -E md5 -lf "$SSH_ID_FILE" 2> /dev/null | awk '{print $2}' | sed 's/^MD5:\(.*\)$/\1/')"
-  if [[ "$FINGERPRINT" == "" ]]; then
-    FINGERPRINT="$(ssh-keygen -lf "$SSH_ID_FILE" | awk '{print $2}')"
-  fi
-  echo $FINGERPRINT
-}
