@@ -6,12 +6,11 @@ set_dir () { DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"; }
 safe_source () { source $1 2> /dev/null; x=$?; set_dir; return $x; }
 set_dir
 
+safe_source $DIR/config.sh || die "Required config file (./config.sh)"
 safe_source $DIR/aktos-bash-lib/basic-functions.sh
 safe_source $DIR/aktos-bash-lib/ssh-functions.sh
-safe_source $DIR/config.sh || die "Required config file (./config.sh)"
-safe_source $DIR/app-lib.sh 
+safe_source $DIR/app-lib.sh
 
-SSH_SOCKET_FILE="/tmp/ssh-$SSH_USER@$SSH_HOST:$SSH_PORT.sock"
 
 ssh_pid=
 start_port_forwarding () {
@@ -21,10 +20,6 @@ start_port_forwarding () {
         -L 2222:localhost:$RENDEZVOUS_SSHD_PORT \
         -M -S $SSH_SOCKET_FILE &
     ssh_pid=$!
-}
-
-ssh_run_via_socket () {
-    $SSH -N -S $SSH_SOCKET_FILE $SSH_HOST $@ &
 }
 
 is_port_forward_working () {
