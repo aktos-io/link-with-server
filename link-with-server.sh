@@ -67,14 +67,6 @@ reconnect () {
         else
             echo
             echo_green $(echo_stamp "Connection is working")
-
-            while IFS= read -r file; do
-                echo_green $(echo_stamp "running: ${file#"$DIR/"}")
-                safe_source $file
-            done < <(find $DIR/on/pre-create-link/ -type f)
-
-            echo_stamp "creating link 22 -> $RENDEZVOUS_SSHD_PORT"
-            create_link
             return 0
         fi
         sleep 1s
@@ -98,6 +90,14 @@ trap cleanup EXIT
 echo_green "using socket file: $SSH_SOCKET_FILE"
 while :; do
     reconnect
+
+    while IFS= read -r file; do
+        echo_green $(echo_stamp "running: ${file#"$DIR/"}")
+        safe_source $file
+    done < <(find $DIR/on/pre-create-link/ -type f)
+
+    echo_stamp "creating link 22 -> $RENDEZVOUS_SSHD_PORT"
+    create_link
     if [ $? == 0 ]; then
         echo_stamp "waiting for tunnel to break..."
         # run "on-connection" scripts here
