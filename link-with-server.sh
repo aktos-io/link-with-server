@@ -24,17 +24,6 @@ create_link () {
         -L 2222:localhost:$RENDEZVOUS_SSHD_PORT
 }
 
-is_sshd_heartbeating () {
-    local host=$1
-    local port=$2
-    local replay="$(echo | timeout 10 nc $host $port 2> /dev/null)"
-    if [[ "$replay" != "" ]]; then
-        return 0
-    else
-        return 1
-    fi
-}
-
 is_port_forward_working () {
     # maybe we could try something like `ssh localhost -p 2222 exit 0`
     # in the future
