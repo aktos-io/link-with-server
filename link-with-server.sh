@@ -94,7 +94,7 @@ while :; do
     while IFS= read -r file; do
         echo_green $(echo_stamp "running: ${file#"$DIR/"}")
         safe_source $file
-    done < <(find $DIR/on/pre-create-link/ -type f)
+    done < <(find $DIR/on/pre-create-link/ -type f -iname "*.sh")
 
     echo_stamp "creating link 22 -> $RENDEZVOUS_SSHD_PORT"
     create_link
@@ -104,7 +104,7 @@ while :; do
         while IFS= read -r file; do
             echo_green $(echo_stamp "running: ${file#"$DIR/"}")
             safe_source $file
-        done < <(find $DIR/on/post-create-link/ -type f)
+        done < <(find $DIR/on/post-create-link/ -type f -iname "*.sh")
     else
         echo_stamp "....unable to create a tunnel."
     fi
@@ -119,7 +119,7 @@ while :; do
     while IFS= read -r file; do
         echo_yellow $(echo_stamp "running: ${file#"$DIR/"}")
         safe_source $file
-    done < <(find $DIR/on/disconnect/ -type f)
+    done < <(find $DIR/on/disconnect/ -type f -iname "*.sh")
     reconnect_delay=2
     echo_stamp "reconnecting in $reconnect_delay seconds..."
     sleep $reconnect_delay
