@@ -30,7 +30,7 @@ Creates a link between the NODE and the RENDEZVOUS SERVER.
 
 2. Create public/private key pair: 
 
-       ssh-keygen -t rsa -b 4096 -C "your_email@example.com"
+       ssh-keygen -N '' -t rsa -b 4096 -C "your_email@example.com"
 
 3. Copy your node's public key to `/home/forward/.ssh/authorized_keys` file on RENDEZVOUS_SERVER in your favourite way.
 
