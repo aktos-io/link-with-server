@@ -2,9 +2,8 @@
 # Author : Cerem Cem ASLAN cem@aktos.io
 # Date   : 30.05.2014
 
-set_dir () { DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"; }
+set_dir () { DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"; }; set_dir
 safe_source () { source $1 2> /dev/null; x=$?; set_dir; return $x; }
-set_dir
 
 safe_source $DIR/config.sh || die "Required config file (./config.sh)"
 safe_source $DIR/aktos-bash-lib/basic-functions.sh
@@ -13,13 +12,27 @@ safe_source $DIR/app-lib.sh
 
 
 ssh_pid=
-start_port_forwarding () {
+start_connection () {
     # DONT USE -f OPTION, $ssh_pid is changing after a few seconds otherwise.
-    $SSH $SSH_USER@$SSH_HOST -p $SSH_PORT -i $SSH_KEY_FILE -N \
-        -R $RENDEZVOUS_SSHD_PORT:localhost:22 \
-        -L 2222:localhost:$RENDEZVOUS_SSHD_PORT \
-        -M -S $SSH_SOCKET_FILE &
+    $SSH $SSH_USER@$SSH_HOST -p $SSH_PORT -i $SSH_KEY_FILE -N -M -S $SSH_SOCKET_FILE \
+        -L 2223:localhost:22 &
     ssh_pid=$!
+}
+
+create_link () {
+    ssh_socket_make_forward -R $RENDEZVOUS_SSHD_PORT:localhost:22 \
+        -L 2222:localhost:$RENDEZVOUS_SSHD_PORT
+}
+
+is_sshd_heartbeating () {
+    local host=$1
+    local port=$2
+    local replay="$(echo | timeout 10 nc $host $port 2> /dev/null)"
+    if [[ "$replay" != "" ]]; then
+        return 0
+    else
+        return 1
+    fi
 }
 
 is_port_forward_working () {
@@ -45,15 +58,23 @@ is_port_forward_working () {
 }
 
 reconnect () {
-    start_port_forwarding
-    echo -n $(echo_stamp "starting port forward (pid: $ssh_pid)")
+    start_connection
+    echo -n $(echo_stamp "starting connection (pid: $ssh_pid)")
     for max_retry in {60..1}; do
-        if ! is_port_forward_working; then
+        if ! is_sshd_heartbeating localhost 2223; then
             #echo_yellow "!! Broken port forward !! retry: $max_retry"
             echo -n "."
         else
             echo
-            echo_green $(echo_stamp "Port forward is working")
+            echo_green $(echo_stamp "Connection is working")
+
+            while IFS= read -r file; do
+                echo_green $(echo_stamp "running: ${file#"$DIR/"}")
+                safe_source $file
+            done < <(find $DIR/on/pre-create-link/ -type f)
+
+            echo_stamp "creating link 22 -> $RENDEZVOUS_SSHD_PORT"
+            create_link
             return 0
         fi
         sleep 1s
@@ -83,7 +104,7 @@ while :; do
         while IFS= read -r file; do
             echo_green $(echo_stamp "running: ${file#"$DIR/"}")
             safe_source $file
-        done < <(find $DIR/on-connect/ -type f)
+        done < <(find $DIR/on/post-create-link/ -type f)
     else
         echo_stamp "....unable to create a tunnel."
     fi
@@ -98,7 +119,7 @@ while :; do
     while IFS= read -r file; do
         echo_yellow $(echo_stamp "running: ${file#"$DIR/"}")
         safe_source $file
-    done < <(find $DIR/on-disconnect/ -type f)
+    done < <(find $DIR/on/disconnect/ -type f)
     reconnect_delay=2
     echo_stamp "reconnecting in $reconnect_delay seconds..."
     sleep $reconnect_delay
