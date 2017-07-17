@@ -8,7 +8,6 @@ safe_source () { source $1 2> /dev/null; x=$?; set_dir; return $x; }
 safe_source $DIR/config.sh || die "Required config file (./config.sh)"
 safe_source $DIR/aktos-bash-lib/basic-functions.sh
 safe_source $DIR/aktos-bash-lib/ssh-functions.sh
-safe_source $DIR/app-lib.sh
 
 
 ssh_pid=
