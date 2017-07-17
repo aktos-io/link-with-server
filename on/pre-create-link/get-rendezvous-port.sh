@@ -8,5 +8,6 @@ if [[ $rendezvous_port ]]; then
     echo_stamp "Received rendezvous port setting: $rendezvous_port"
     RENDEZVOUS_SSHD_PORT=$rendezvous_port
 else
-    echo_stamp "Using rendezvous port in config file: $RENDEZVOUS_SSHD_PORT"
+    RENDEZVOUS_SSHD_PORT=$ORIG_RENDEZVOUS_PORT
+    echo_yellow $(echo_stamp "Using rendezvous port in config file: $RENDEZVOUS_SSHD_PORT")
 fi

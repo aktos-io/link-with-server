@@ -6,9 +6,13 @@ set_dir () { DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"; }; set_dir
 safe_source () { source $1 2> /dev/null; x=$?; set_dir; return $x; }
 
 safe_source $DIR/config.sh || die "Required config file (./config.sh)"
+ORIG_RENDEZVOUS_PORT=$RENDEZVOUS_SSHD_PORT
+
 safe_source $DIR/aktos-bash-lib/basic-functions.sh
 safe_source $DIR/aktos-bash-lib/ssh-functions.sh
 
+
+SSH="$SSH -oStrictHostKeyChecking=yes -oPreferredAuthentications=publickey,"
 
 ssh_pid=
 start_connection () {
