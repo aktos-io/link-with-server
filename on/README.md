@@ -13,7 +13,7 @@ Example `disconnect` script that logs every disconnec event:
 
     echo_stamp "disconnected." >> disconnect.log
 
-Example `pre-create-link` script that fetces rendezvous port setting: 
+Example `pre-create-link` script that fetches rendezvous port setting: 
 
     public_key=$(get_public_key $SSH_KEY_FILE)
     curr_fingerprint=$(get_fingerprint $public_key)
