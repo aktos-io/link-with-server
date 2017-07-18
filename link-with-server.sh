@@ -12,7 +12,18 @@ safe_source $DIR/aktos-bash-lib/basic-functions.sh
 safe_source $DIR/aktos-bash-lib/ssh-functions.sh
 
 
-SSH="$SSH -oStrictHostKeyChecking=yes -oPreferredAuthentications=publickey,"
+SSH="$SSH -oStrictHostKeyChecking=yes -oPreferredAuthentications=publickey"
+
+on_connect_scripts_dir=$DIR/on/connect
+on_disconnect_scripts_dir=$DIR/on/disconnect
+
+run_event_scripts () {
+    local search_dir=$1
+    while IFS= read -r file; do
+        echo_green $(echo_stamp "running event script: ${file#"$DIR/"}")
+        safe_source $file
+    done < <(find $search_dir -type f -iname "*.sh")
+}
 
 ssh_pid=
 start_connection () {
@@ -78,18 +89,20 @@ cleanup () {
 # ------------------------- APPLICATION --------------------------------- #
 sure_exit () {
     {
-    if prompt_yes_no "YOU MAY HAVE TO GET PHYSICAL ACCESS TO THIS MACHINE? DO YOU HAVE IT?"; then
+    echo_red $(echo_stamp "Refreshing connection.")
+    cleanup
+    if prompt_yes_no "Do you want to shut down this service?"; then
         local msg="Yes, I have physical access to this machine"
-        read -p "Type \"$msg\" :" reply
-        if [[ "$msg" == "$reply" ]]; then 
-            echo_red "Okay, you wanted this."
+        read -p "Type \"$msg\" : " reply
+        if [[ "$msg" == "$reply" ]]; then
+            echo_red "Okay, you really wanted this."
             kill $$
         else
             echo "reply: $reply"
             echo_yellow "You typed wrongly. Try stopping again."
         fi
     else
-        echo_green "Come back when you have. We are good anyway."
+        echo_green $(echo_stamp "I thought so.")
     fi
     } &
 }
@@ -101,21 +114,11 @@ trap cleanup EXIT
 echo_green "using socket file: $SSH_SOCKET_FILE"
 while :; do
     reconnect
-
-    while IFS= read -r file; do
-        echo_green $(echo_stamp "running: ${file#"$DIR/"}")
-        safe_source $file
-    done < <(find $DIR/on/pre-create-link/ -type f -iname "*.sh")
-
+    run_event_scripts $on_connect_scripts_dir
     echo_stamp "creating link 22 -> $RENDEZVOUS_SSHD_PORT"
     create_link
     if [ $? == 0 ]; then
         echo_stamp "waiting for tunnel to break..."
-        # run "on-connection" scripts here
-        while IFS= read -r file; do
-            echo_green $(echo_stamp "running: ${file#"$DIR/"}")
-            safe_source $file
-        done < <(find $DIR/on/post-create-link/ -type f -iname "*.sh")
     else
         echo_stamp "....unable to create a tunnel."
     fi
@@ -127,10 +130,8 @@ while :; do
     done
     echo_stamp "tunnel seems broken. cleaning up."
     cleanup
-    while IFS= read -r file; do
-        echo_yellow $(echo_stamp "running: ${file#"$DIR/"}")
-        safe_source $file
-    done < <(find $DIR/on/disconnect/ -type f -iname "*.sh")
+    run_event_scripts $on_disconnect_scripts_dir
+
     reconnect_delay=2
     echo_stamp "reconnecting in $reconnect_delay seconds..."
     sleep $reconnect_delay
