@@ -76,7 +76,26 @@ cleanup () {
 
 
 # ------------------------- APPLICATION --------------------------------- #
+sure_exit () {
+    {
+    if prompt_yes_no "YOU MAY HAVE TO GET PHYSICAL ACCESS TO THIS MACHINE? DO YOU HAVE IT?"; then
+        local msg="Yes, I have physical access to this machine"
+        read -p "Type \"$msg\" :" reply
+        if [[ "$msg" == "$reply" ]]; then 
+            echo_red "Okay, you wanted this."
+            kill $$
+        else
+            echo "reply: $reply"
+            echo_yellow "You typed wrongly. Try stopping again."
+        fi
+    else
+        echo_green "Come back when you have. We are good anyway."
+    fi
+    } &
+}
 
+
+trap sure_exit SIGINT
 trap cleanup EXIT
 
 echo_green "using socket file: $SSH_SOCKET_FILE"
