@@ -2,10 +2,10 @@
 
 Creates a link between the NODE and the RENDEZVOUS SERVER.
 
-# Setup on Server (for the first time)
+# Setup SSH Server on Server Side (for the first time)
 
 1. Install OpenSSH server if not installed.
-2. Create a standard unix user account (say `forward`)
+2. *Recommended:* Create a standard unix user account (say `forward`) and use it for the connections.
 3. Add following section to `/etc/ssh/sshd_config` file:
 
         Match User forward
@@ -61,5 +61,6 @@ Creates a link between the NODE and the RENDEZVOUS SERVER.
     2. after actual link is created under `on/post-create-link` folder. 
     3. on disconnect under `on/pre-create-link` folder. 
 
+# Recommended Tools 
 
-
+* [aktos-io/service-runner](https://github.com/aktos-io/service-runner): Run applications on boot and manage/debug them easily.
