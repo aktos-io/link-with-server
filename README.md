@@ -55,11 +55,10 @@ Creates a link between the NODE and the RENDEZVOUS SERVER.
     > When "tunnel is established", the `RENDEZVOUS_SSHD_PORT` on server 
     > is representing the ssh port (22) of the NODE. 
     
-2. Place any scripts to run 
+2. Place any scripts: 
 
-    1. before actual link is created under `on/pre-create-link` folder. 
-    2. after actual link is created under `on/post-create-link` folder. 
-    3. on disconnect under `on/pre-create-link` folder. 
+    1. to run before actual link is created: `on/connect` folder. 
+    3. to run on disconnect: `on/disconnect` folder. 
 
 # Recommended Tools 
 
