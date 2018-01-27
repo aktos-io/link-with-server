@@ -1,6 +1,6 @@
 # Link With Server
 
-Creates a link between the NODE and the RENDEZVOUS SERVER.
+Creates a link between the NODE and the LINK UP SERVER.
 
 # Setup SSH Server on Server Side (for the first time)
 
@@ -30,7 +30,7 @@ Creates a link between the NODE and the RENDEZVOUS SERVER.
 
        ssh-keygen -N '' -t rsa -b 4096 -C "your_email@example.com"
 
-3. Copy your node's public key to `/home/forward/.ssh/authorized_keys` file on RENDEZVOUS_SERVER in your favourite way.
+3. Copy your node's public key to `/home/forward/.ssh/authorized_keys` file on LINK_UP_SERVER in your favourite way.
 
         # Basically, just copy and paste your public key: 
         $ cat ~/.ssh/id_rsa.pub
