@@ -52,7 +52,7 @@ Creates a link between the NODE and the LINK UP SERVER.
 
 1. Run `./link-with-server.sh` to create a link with server. 
 
-    > When "tunnel is established", the `RENDEZVOUS_SSHD_PORT` on server 
+    > When "tunnel is established", the `LINK_UP_SSHD_PORT` on server 
     > is representing the ssh port (22) of the NODE. 
     
 2. Place any scripts: 

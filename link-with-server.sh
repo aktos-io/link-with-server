@@ -6,7 +6,7 @@ set_dir () { DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"; }; set_dir
 safe_source () { source $1 2> /dev/null; x=$?; set_dir; return $x; }
 
 safe_source $DIR/config.sh || die "Required config file (./config.sh)"
-ORIG_RENDEZVOUS_PORT=$RENDEZVOUS_SSHD_PORT
+ORIG_LINK_UP_PORT=$LINK_UP_SSHD_PORT
 
 safe_source $DIR/aktos-bash-lib/basic-functions.sh
 safe_source $DIR/aktos-bash-lib/ssh-functions.sh
@@ -34,8 +34,8 @@ start_connection () {
 }
 
 create_link () {
-    ssh_socket_make_forward -R $RENDEZVOUS_SSHD_PORT:localhost:22 \
-        -L 2222:localhost:$RENDEZVOUS_SSHD_PORT
+    ssh_socket_make_forward -R $LINK_UP_SSHD_PORT:localhost:22 \
+        -L 2222:localhost:$LINK_UP_SSHD_PORT
 }
 
 is_port_forward_working () {
@@ -115,7 +115,7 @@ echo_green "using socket file: $SSH_SOCKET_FILE"
 while :; do
     reconnect
     run_event_scripts $on_connect_scripts_dir
-    echo_stamp "creating link 22 -> $RENDEZVOUS_SSHD_PORT"
+    echo_stamp "creating link 22 -> $LINK_UP_SSHD_PORT"
     create_link
     if [ $? == 0 ]; then
         echo_stamp "waiting for tunnel to break..."
