@@ -2,7 +2,7 @@
 
 Creates a link between the NODE and the LINK UP SERVER.
 
-**WARNING*** : `StrictHostKeyChecking` is disabled, you must prepare for a MITM attack.
+**WARNING** : `StrictHostKeyChecking` is disabled, you must prepare for a MITM attack.
 
 
 # Setup SSH Server on Server Side (for the first time)
