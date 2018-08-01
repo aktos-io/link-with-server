@@ -1,4 +1,4 @@
 *.log
 ssh_keys
 mobmac-conf.sh
-
+config.sh

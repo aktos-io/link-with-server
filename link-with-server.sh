@@ -12,7 +12,7 @@ safe_source $DIR/aktos-bash-lib/basic-functions.sh
 safe_source $DIR/aktos-bash-lib/ssh-functions.sh
 
 
-SSH="$SSH -oStrictHostKeyChecking=yes -oPreferredAuthentications=publickey"
+SSH="$SSH -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null -oPreferredAuthentications=publickey"
 
 on_connect_scripts_dir=$DIR/on/connect
 on_disconnect_scripts_dir=$DIR/on/disconnect
@@ -60,16 +60,20 @@ is_port_forward_working () {
     fi
 }
 
+shutting_down=false
+
 reconnect () {
     start_connection
     echo -n $(echo_stamp "starting connection (pid: $ssh_pid)")
     for max_retry in {60..1}; do
         if ! is_sshd_heartbeating localhost 2223; then
             #echo_yellow "!! Broken port forward !! retry: $max_retry"
-            echo -n "."
+            [[ $shutting_down == true ]] || >&2 echo -e -n "."
         else
             echo
             echo_green $(echo_stamp "Connection is working")
+            shutting_down=false
+            connected=true
             return 0
         fi
         sleep 1s
@@ -88,9 +92,12 @@ cleanup () {
 
 # ------------------------- APPLICATION --------------------------------- #
 sure_exit () {
+    if [[ $connected != true  ]]; then
+        echo_yellow "Never connected yet, shutting down immediately."
+        kill $$
+    fi
+    shutting_down=true
     {
-    echo_red $(echo_stamp "Refreshing connection.")
-    cleanup
     if prompt_yes_no "Do you want to shut down this service?"; then
         local msg="Yes, I have physical access to this machine"
         read -p "Type \"$msg\" : " reply
@@ -134,5 +141,6 @@ while :; do
 
     reconnect_delay=2
     echo_stamp "reconnecting in $reconnect_delay seconds..."
+    shutting_down=false
     sleep $reconnect_delay
 done

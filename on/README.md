@@ -1,20 +1,19 @@
-Scripts in these folders will be sourced upon appropriate event. 
+Scripts in these folders will be sourced upon appropriate event.
 
-You can safely delete every script in this folders. In this case, `link-with-server` will use `config.sh` and create only link_up port link.
+You can safely delete every script in this folder. In this case, `link-with-server`
+will use `$LINK_UP_SSHD_PORT` from `config.sh`.
 
 # Examples:
 
-Example `post-create-link` script that forwards port 4008 to localhost:14008:
+### connect
+Example script that forwards port 4008 to localhost:14008:
 
     echo_stamp "forwarding scada port: R:4008 -> L:14008 "
     ssh_socket_make_forward -L 14008:localhost:4008
 
-Example `disconnect` script that logs every disconnec event:
+Example script that fetches link_up port setting:
 
-    echo_stamp "disconnected." >> disconnect.log
-
-Example `pre-create-link` script that fetches link_up port setting:
-
+    # use ssh_id fingerprint to get the unique link up port
     public_key=$(get_public_key $SSH_KEY_FILE)
     curr_fingerprint=$(get_fingerprint $public_key)
 
@@ -27,3 +26,9 @@ Example `pre-create-link` script that fetches link_up port setting:
     else
          echo_stamp "Using link_up port in config file: $LINK_UP_SSHD_PORT"
     fi
+
+### disconnect
+
+Example `disconnect` script that logs every disconnect event:
+
+    echo_stamp "disconnected." >> disconnect.log
