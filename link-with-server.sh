@@ -99,7 +99,7 @@ sure_exit () {
     shutting_down=true
     {
     if prompt_yes_no "Do you want to shut down this service?"; then
-        local msg="Yes, I have physical access to this machine"
+        local msg="Yes, I can directly make SSH connection to this machine"
         read -p "Type \"$msg\" : " reply
         if [[ "$msg" == "$reply" ]]; then
             echo_red "Okay, you really wanted this."
