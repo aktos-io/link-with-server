@@ -44,9 +44,9 @@ Creates a link between the NODE and the LINK UP SERVER.
 
 5. Make `link-with-server.sh` run on startup.
 
-    > Running this script in background is your responsibility.
-    > Preferred way is running with `aktos-io/service-runner`
-    > Simplest method is: add following line in `/etc/rc.local` file:
+    > Running this script in background is your responsibility. <br />
+    > Recommended way: Use [aktos-io/service-runner](https://github.com/aktos-io/service-runner) <br />
+    > Simplistic way:  Add following line into the `/etc/rc.local` file:
     >
     >     nohup /path/to/link-with-server.sh &
     >
