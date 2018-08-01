@@ -28,7 +28,7 @@ Creates a link between the NODE and the LINK UP SERVER.
 
 1. Clone this repository:
 
-       git clone --init --recursive https://github.com/aktos-io/link-with-server
+       git clone --recursive https://github.com/aktos-io/link-with-server
 
 2. Create public/private key pair:
 
