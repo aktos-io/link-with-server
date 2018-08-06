@@ -2,7 +2,7 @@
 
 Creates a link between the NODE and the LINK UP SERVER.
 
-**WARNING*** : `StrictHostKeyChecking` is disabled, you must prepare for a MITM attack.
+**WARNING** : `StrictHostKeyChecking` is disabled, you must prepare for a MITM attack.
 
 
 # Setup SSH Server on Server Side (for the first time)
@@ -34,11 +34,11 @@ Creates a link between the NODE and the LINK UP SERVER.
 
        ssh-keygen -N '' -t rsa -b 4096 -C "your_email@example.com"
 
-3. Copy your node's public key to `/home/forward/.ssh/authorized_keys` file on LINK_UP_SERVER in your favourite way.
+3. Append your node's public key to `/home/forward/.ssh/authorized_keys` file on LINK_UP_SERVER in your favourite way.
 
-        # Basically, just copy and paste your public key:
+        # Basically, just copy and paste the following command's output:
         $ cat ~/.ssh/id_rsa.pub
-        ....your public key to select, copy and paste into authorized_keys...
+        ssh-rsa AAAAB3NzaC1yc2EAA...UCSo974furRP5N foo@example.com  
 
 4. Edit the configuration file (`./config.sh`).
 
