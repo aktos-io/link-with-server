@@ -50,7 +50,7 @@ create_link () {
     if [[ ! -z $link_pid ]]; then
         echo "Killing previous link pid: $link_pid"
         kill $link_pid 2> /dev/null
-        [[ $? -gt 0 ]] && echo "...killed already?"
+        #[[ $? -gt 0 ]] && echo "...killed already?"
     fi
     $SSH -N                                     \
         -R $LINK_UP_SSHD_PORT:localhost:22      \
