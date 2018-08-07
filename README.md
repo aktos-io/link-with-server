@@ -18,6 +18,18 @@ Creates a link between the NODE and the LINK UP SERVER.
                     ForceCommand echo "This account is only for making link with server"
                     PasswordAuthentication no
 
+        or use a handler script:
+        
+            Match User forward
+                    AllowTcpForwarding yes
+                    PermitTunnel yes
+                    ForceCommand /path/to/handler.sh
+                    PasswordAuthentication no
+                    
+        *handler.sh*:
+
+           #/bin/bash
+           echo "original command was $SSH_ORIGINAL_COMMAND"
 
     3. Restart sshd on server:
 
