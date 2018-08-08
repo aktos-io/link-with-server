@@ -44,7 +44,8 @@ Creates a link between the NODE and the LINK UP SERVER.
 
 2. Create public/private key pair:
 
-       ssh-keygen -N '' -t rsa -b 4096 -C "your_email@example.com"
+       cd link-with-server
+       ./gen-private-key.sh
 
 3. Append your node's public key to `/home/forward/.ssh/authorized_keys` file on LINK_UP_SERVER in your favourite way.
 
@@ -52,7 +53,7 @@ Creates a link between the NODE and the LINK UP SERVER.
         $ cat ~/.ssh/id_rsa.pub
         ssh-rsa AAAAB3NzaC1yc2EAA...UCSo974furRP5N foo@example.com  
 
-4. Edit the configuration file (`./config.sh`).
+4. Edit the configuration file (`./config.sh`) to set host and port.
 
 5. Make `link-with-server.sh` run on startup.
 
