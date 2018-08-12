@@ -23,7 +23,7 @@ get_host_fingerprint(){
     local host=$1
     local port=${2:-22}
     local file=$(mktemp)
-    timeout 10 ssh-keyscan -p $port $host 2> /dev/null > $file
+    timeout 30 ssh-keyscan -p $port $host 2> /dev/null > $file
     ssh-keygen -l -f $file 2> /dev/null | grep ECDSA | awk '{print $2}'
 }
 
