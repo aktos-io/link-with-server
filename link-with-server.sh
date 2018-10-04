@@ -27,6 +27,8 @@ get_host_fingerprint(){
     ssh-keygen -l -f $file 2> /dev/null | grep ECDSA | awk '{print $2}'
 }
 
+[[ -f $SSH_KEY_FILE ]] || die "No ssh key file found."
+
 SSH="$SSH -q -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null \
     -oPreferredAuthentications=publickey $SSH_USER@$SSH_HOST -p $SSH_PORT -i $SSH_KEY_FILE"
 
