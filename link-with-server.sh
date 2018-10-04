@@ -15,6 +15,8 @@ safe_source () { source $1; set_dir; }
 
 safe_source $_dir/config.sh || die "Required config file (./config.sh)"
 ORIG_LINK_UP_PORT=$LINK_UP_SSHD_PORT
+LOCAL_SSHD_PORT=$(egrep "^Port" /etc/ssh/sshd_config | cut -d " " -f 2)
+ECHO_PORT=2222
 
 safe_source $_dir/aktos-bash-lib/basic-functions.sh
 safe_source $_dir/aktos-bash-lib/ssh-functions.sh
@@ -55,17 +57,17 @@ create_link () {
         #[[ $? -gt 0 ]] && echo "...killed already?"
     fi
     $SSH -N                                     \
-        -R $LINK_UP_SSHD_PORT:localhost:22      \
+        -R $LINK_UP_SSHD_PORT:localhost:$LOCAL_SSHD_PORT      \
         -L 2222:localhost:$LINK_UP_SSHD_PORT &  # for echo purposes
     link_pid=$!
 }
 
 
 is_port_forward_working () {
-    # maybe we could try something like `ssh localhost -p 2222 exit 0`
+    # maybe we could try something like `ssh localhost -p $ECHO_PORT exit 0`
     # in the future
-    local proxied=$(get_host_fingerprint 127.0.0.1 2222)
-    local orig=$(get_host_fingerprint 127.0.0.1 22)
+    local proxied=$(get_host_fingerprint 127.0.0.1 $ECHO_PORT)
+    local orig=$(get_host_fingerprint 127.0.0.1 $LOCAL_SSHD_PORT)
 
     #echo "proxied: $proxied, orig: $orig"
     if [[ "$proxied" == "" ]]; then
@@ -123,7 +125,8 @@ trap cleanup EXIT
 connected=false
 while :; do
     run_event_scripts $on_connect_scripts_dir
-    echo_stamp "creating link 22 -> $LINK_UP_SSHD_PORT"
+    echo_stamp "Using server: $SSH_HOST:$SSH_PORT"
+    echo_stamp "creating link $LOCAL_SSHD_PORT -> $LINK_UP_SSHD_PORT"
     create_link
     i=0
     while :; do
