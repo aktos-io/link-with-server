@@ -6,6 +6,7 @@ set_dir(){ _dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"; }; set_dir
 safe_source () { source $1; set_dir; }
 # end of bash boilerplate
 
+
 # Strategy
 # 1. Connect to server
 # 2. Create a reverse port forward to put localhost:22 to server:$LUP
@@ -29,7 +30,7 @@ get_host_fingerprint(){
     ssh-keygen -l -f $file 2> /dev/null | grep ECDSA | awk '{print $2}'
 }
 
-[[ -f $SSH_KEY_FILE ]] || die "No ssh key file found."
+[[ -f $SSH_KEY_FILE ]] || die "No ssh key file found: $SSH_KEY_FILE"
 
 SSH="$SSH -q -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null \
     -oPreferredAuthentications=publickey $SSH_USER@$SSH_HOST -p $SSH_PORT -i $SSH_KEY_FILE"
@@ -118,8 +119,13 @@ sure_exit () {
     } &
 }
 
+restart () {
+    echo_green $(echo_stamp "Restarting link-with-server")
+    exec $_dir/restart.sh
+}
 
-trap sure_exit SIGINT
+#trap sure_exit SIGINT
+trap restart SIGINT
 trap cleanup EXIT
 
 connected=false

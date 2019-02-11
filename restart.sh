@@ -9,6 +9,16 @@ if [[ -z ${TMUX:-} ]]; then
     exit 1
 fi
 
+
+ignore_sigint(){
+    echo "--------------------------------------"
+    echo "WARNING: IGNORING SIGINT IN restart.sh"
+    echo "--------------------------------------"
+    sleep 2
+}
+
+trap ignore_sigint SIGINT
+
 echo "Killing link-with-server"
 killall link-with-server.sh > /dev/null 
 sleep 2
