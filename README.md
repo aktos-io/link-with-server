@@ -43,9 +43,9 @@ Creates a link between the NODE and the LINK UP SERVER.
        git clone --recursive https://github.com/aktos-io/link-with-server
        cd link-with-server
 
-2. Edit the configuration file (`./config.sh`) accordingly.
+2. Copy sample config file (`config.sh.sample`) as `config.sh` and edit the configuration file (`./config.sh`) accordingly.
 
-3. Create public/private key pair if necessary:
+3. IF NECESSARY: Create public/private key pair:
 
        ./gen-private-key.sh
 
