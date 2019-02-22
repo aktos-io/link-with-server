@@ -11,10 +11,14 @@ fi
 
 
 ignore_sigint(){
+    local timeout=20
     echo "--------------------------------------"
     echo "WARNING: IGNORING SIGINT IN restart.sh"
+    echo "If you want to stop the process, use the"
+    echo "command in $timeout seconds:"
+    echo "kill $$"
     echo "--------------------------------------"
-    sleep 2
+    sleep $timeout
 }
 
 trap ignore_sigint SIGINT
