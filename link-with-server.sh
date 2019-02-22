@@ -57,8 +57,10 @@ create_link () {
         kill $link_pid 2> /dev/null
         #[[ $? -gt 0 ]] && echo "...killed already?"
     fi
+    local lport=${LOCAL_SSHD_PORT:-22}
+    echo "linkup sshd port $LINK_UP_SSHD_PORT, local: $lport"
     $SSH -N                                     \
-        -R $LINK_UP_SSHD_PORT:localhost:$LOCAL_SSHD_PORT      \
+        -R $LINK_UP_SSHD_PORT:localhost:$lport      \
         -L 2222:localhost:$LINK_UP_SSHD_PORT &  # for echo purposes
     link_pid=$!
 }
