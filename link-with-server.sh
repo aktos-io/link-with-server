@@ -149,7 +149,7 @@ while :; do
             fi
         else
             if [[ $connected == false ]]; then
-                echo_stamp "waiting for tunnel to break..."
+                echo_stamp "CONNECTED. Monitoring tunnel operability..."
             fi
             connected=true
             i=0
