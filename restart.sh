@@ -24,7 +24,7 @@ ignore_sigint(){
 trap ignore_sigint SIGINT
 
 echo "Killing link-with-server"
-killall link-with-server.sh > /dev/null 
+pkill link-with-server.sh > /dev/null 
 sleep 2
 echo "restarting link-with-server"
 exec $_dir/link-with-server.sh 
