@@ -158,6 +158,13 @@ cleanup () {
     fi
 }
 
+is_ssh_server_alive(){
+    hash nc || exit 1
+    local hostname=$1
+    local port=${2:-22}
+    nc -vzw 1 $hostname $port
+}
+
 # ------------------------- APPLICATION --------------------------------- #
 sure_exit () {
     if [[ $connected != true  ]]; then
@@ -193,6 +200,10 @@ trap cleanup EXIT
 
 connected=false
 while :; do
+    while ! is_ssh_server_alive "$SSH_HOST" "$SSH_PORT"; do
+        echo_red $(echo_stamp "Waiting for server $SSH_HOST:$SSH_PORT to be ready...")
+        sleep 5
+    done
     run_event_scripts $on_connect_scripts_dir
     echo_stamp "Using server: $SSH_HOST:$SSH_PORT"
     echo_stamp "creating link $LOCAL_SSHD_PORT -> $LINK_UP_SSHD_PORT"
