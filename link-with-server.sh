@@ -6,21 +6,82 @@ set_dir(){ _dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"; }; set_dir
 safe_source () { source $1; set_dir; }
 # end of bash boilerplate
 
-
 # Strategy
+# ========
 # 1. Connect to server
 # 2. Create a reverse port forward to put localhost:22 to server:$LUP
 # 3. Create a local port forward to get back server:$LUP to localhost:2222
 # 4. get host finger print of port 22 and port 2222, if they are equal, tunnel
 #    is working
 
+# show help
+# -----------------------------------------------
+show_help(){
+    cat <<HELP
+    $(basename $0) [options] 
+    Options:
+        --test-and-install      : Test the connection, install as a boot service
+                                  if connection succeeds.
+
+HELP
+}
+
+die(){
+    echo
+    echo "$1"
+    show_help
+    exit 1
+}
+
 safe_source $_dir/config.sh || die "Required config file (./config.sh)"
 ORIG_LINK_UP_PORT=$LINK_UP_SSHD_PORT
 LOCAL_SSHD_PORT=$(egrep "^Port" /etc/ssh/sshd_config | cut -d " " -f 2)
+LOCAL_SSHD_PORT=${LOCAL_SSHD_PORT:-22}
+
 ECHO_PORT=2222
 
 safe_source $_dir/aktos-bash-lib/basic-functions.sh
 safe_source $_dir/aktos-bash-lib/ssh-functions.sh
+
+
+# Parse command line arguments
+# ---------------------------
+# Initialize parameters
+test_mode=false
+# ---------------------------
+args_backup=("$@")
+args=()
+_count=1
+while [ $# -gt 0 ]; do
+    key="${1:-}"
+    case $key in
+        -h|-\?|--help|'')
+            show_help    # Display a usage synopsis.
+            exit
+            ;;
+        # --------------------------------------------------------
+        --test) 
+            echo_yellow $(echo_stamp "Started in Test Mode.")
+            test_mode=true
+            ;;
+        # --------------------------------------------------------
+        -*) # Handle unrecognized options
+            die "Unknown option: $1"
+            ;;
+        *)  # Generate the new positional arguments: $arg1, $arg2, ... and ${args[@]}
+            if [[ ! -z ${1:-} ]]; then
+                declare arg$((_count++))="$1"
+                args+=("$1")
+            fi
+            ;;
+    esac
+    shift
+    [[ -z ${1:-} ]] && break
+done; set -- "${args_backup[@]}"
+# Use $arg1 in place of $1, $arg2 in place of $2 and so on, 
+# "$@" is in the original state,
+# use ${args[@]} for new positional arguments  
+
 
 get_host_fingerprint(){
     local host=$1
@@ -145,11 +206,18 @@ while :; do
             else
                 echo_stamp "seems not working ($i)..."
                 i=$((i + 1))
-                [[ $i -gt 5 ]] && break
+                if [[ $i -gt 5 ]]; then
+                    echo_stamp 
+                    break
+                fi
             fi
         else
             if [[ $connected == false ]]; then
-                echo_stamp "CONNECTED. Monitoring tunnel operability..."
+                echo_green $(echo_stamp "CONNECTED $LOCAL_SSHD_PORT -> $LINK_UP_SSHD_PORT. Monitoring the tunnel.")
+                if $test_mode; then
+                    echo_green $(echo_stamp "Successfully exiting from test mode.")
+                    exit 0
+                fi
             fi
             connected=true
             i=0
@@ -160,6 +228,10 @@ while :; do
     [[ $shutting_down == true ]] && sleep 2m
     echo_stamp "tunnel seems broken. cleaning up."
     run_event_scripts $on_disconnect_scripts_dir
+    if $test_mode; then
+        echo_yellow $(echo_stamp "Test mode was active. There was an error on connection. Exiting.")
+        exit 1
+    fi
     reconnect_delay=3
     echo_stamp "reconnecting in $reconnect_delay seconds..."
     shutting_down=false
