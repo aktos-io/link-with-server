@@ -1,6 +1,6 @@
 # Link With Server
 
-Creates a link between the NODE and the LINK UP SERVER.
+Creates a link between the CLIENT and the LINK UP SERVER.
 
 **WARNING** : `StrictHostKeyChecking` is disabled, you must get prepared for MITM attacks.
 
@@ -29,25 +29,28 @@ Creates a link between the NODE and the LINK UP SERVER.
             sudo /etc/init.d/ssh restart
 
 
-# Setup per Node (Client) (on every node deployment)
+# Setup per CLIENT on every deployment
 
-       sudo apt install netcat
-       git clone --recursive https://github.com/aktos-io/link-with-server
-       cd link-with-server
-       cp config.sh{.sample,}
-       nano config.sh
-       ./gen-private-key-if-necessary.sh 
-       cat ${SSH_KEY_FILE}.pub  # | curl -F 'sprunge=<-' http://sprunge.us # to share with an external service.
-       # Send it *manually* to your server. BEWARE Possible MITM attacks. 
-       # Insert the line public key contents into /home/lws/your-authorized-keys-file 
-       ./link-with-server.sh --test && ./register-to-boot.sh
-       # Trigger the first run manually: sudo systemctl start ...
+    sudo apt install netcat
+    git clone --recursive https://github.com/aktos-io/link-with-server
+    cd link-with-server
+    cp config.sh{.sample,}
+    nano config.sh
+    ./gen-private-key-if-necessary.sh 
+    # Send your public key to your server *manually* incase of a MITM attack. 
+    cat ${SSH_KEY_FILE}.pub  # send it via e-mail, or: 
+    cat ${SSH_KEY_FILE}.pub | curl -F 'sprunge=<-' http://sprunge.us # to share via an external service.
+    # Insert the line public key contents into /home/lws/your-authorized-keys-file 
+    ./link-with-server.sh --test && \
+        ./register-to-boot.sh
+    # Enable and trigger first run
+    ./watch-logs.sh
 
 
 1. Clone this repository. 
 2. Create `config.sh` (see `config.sh.sample`)
 3. Create public/private key pair if necessary.
-4. Append your node's public key to the `authorized_keys` file on your LINK_UP_SERVER. 
+4. Append your CLIENT's public key to the `authorized_keys` file on your LINK_UP_SERVER. 
 5. Test your connectivity with simply running `./link-with-server.sh --test`.
 6. Start `./link-with-server.sh` as a long running application, by using `./register-to-boot.sh` or: 
 
