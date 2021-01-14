@@ -55,6 +55,19 @@ Creates a link between the CLIENT and the LINK UP SERVER.
 6. Start `./link-with-server.sh` as a long running application, by using `./register-to-boot.sh` or: 
 
         nohup ./link-with-server.sh & ; exit 
+        
+# Usage
+
+* Either use https://github.com/aktos-io/dcs-tools
+* Or quickly connect to your target by: 
+
+      ssh_jump(){ ssh -J ${SSH_USER}@${SSH_HOST}:{SSH_PORT} ${TARGET_USER}@localhost -p ${LINK_UP_SSHD_PORT} $@; }
+
+      # simple connection
+      ssh_jump 
+      
+      # with auto reconnect
+      while sleep 1; do ssh_jump -t 'tmux a || tmux'; done  
 
 # Hooks
 
