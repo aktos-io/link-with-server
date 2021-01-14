@@ -89,6 +89,7 @@ get_host_fingerprint(){
     local file=$(mktemp)
     timeout 30 ssh-keyscan -p $port $host 2> /dev/null > $file
     ssh-keygen -l -f $file 2> /dev/null | grep ECDSA | awk '{print $2}'
+    rm "$file"
 }
 
 [[ -f $SSH_KEY_FILE ]] || die "No ssh key file found: $SSH_KEY_FILE"
