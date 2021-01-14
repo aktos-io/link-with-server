@@ -21,8 +21,10 @@ Creates a link between the CLIENT and the LINK UP SERVER.
                     
     3. Create your handler script: `/home/lws/handler.sh` (don't forget to make it executable):
 
-           #/bin/bash
-           echo "original command was $SSH_ORIGINAL_COMMAND"
+       ```bash
+       #/bin/bash
+       echo "original command was $SSH_ORIGINAL_COMMAND"
+       ```
 
     3. Restart sshd on server:
 
@@ -31,21 +33,22 @@ Creates a link between the CLIENT and the LINK UP SERVER.
 
 # Setup per CLIENT on every deployment
 
-    sudo apt install netcat
-    git clone --recursive https://github.com/aktos-io/link-with-server
-    cd link-with-server
-    cp config.sh{.sample,}
-    nano config.sh
-    ./gen-private-key-if-necessary.sh 
-    # Send your public key to your server *manually* incase of a MITM attack. 
-    cat ${SSH_KEY_FILE}.pub  # send it via e-mail, or: 
-    cat ${SSH_KEY_FILE}.pub | curl -F 'sprunge=<-' http://sprunge.us # to share via an external service.
-    # Insert the line public key contents into /home/lws/your-authorized-keys-file 
-    ./link-with-server.sh --test && \
-        ./register-to-boot.sh
-    # Enable and trigger first run
-    ./watch-logs.sh
-
+```bash
+sudo apt install netcat
+git clone --recursive https://github.com/aktos-io/link-with-server
+cd link-with-server
+cp config.sh{.sample,}
+nano config.sh
+./gen-private-key-if-necessary.sh 
+# Send your public key to your server *manually* incase of a MITM attack. 
+cat ${SSH_KEY_FILE}.pub  # send it via e-mail, or: 
+cat ${SSH_KEY_FILE}.pub | curl -F 'sprunge=<-' http://sprunge.us # to share via an external service.
+# Insert the line public key contents into /home/lws/your-authorized-keys-file 
+./link-with-server.sh --test && \
+    ./register-to-boot.sh
+# Enable and trigger first run
+./watch-logs.sh
+```
 
 1. Clone this repository. 
 2. Create `config.sh` (see `config.sh.sample`)
