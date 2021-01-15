@@ -4,16 +4,17 @@ _sdir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 show_help(){
     cat <<HELP
 
-    $(basename $0) [options] -t PORT -u USER [-c [commands]]
+    $(basename $0) [options] -t PORT -u USER [-- [commands]]
 
     Reconnects if connection drops. (Requires Tmux on the remote side.)
 
     Options:
 
-        -t TARGET_PORT       : Target's SSHD port on rendezvous (link up) server.
+        -t TARGET_PORT       : Target's SSHD port on rendezvous server.
         -u USER              : Username to use while logging in to the target.
-        -c, --cmd [commands] : Do not reconnect, make a simple connection.
+        -- [commands]        : Do not reconnect, make a simple connection.
         -k, --known-hosts    : Path to known_hosts file.
+        -n, --no-reconnect   : Do not try to reconnect
 
 HELP
 }
@@ -37,7 +38,9 @@ source "$config"
 target_user=
 target_port=
 reconnect=true
+no_reconnect=false
 known_hosts_file=
+cmd=()
 # ---------------------------
 args_backup=("$@")
 args=()
@@ -56,8 +59,13 @@ while [ $# -gt 0 ]; do
         -t) shift
             target_port="$1"
             ;;
-        -c|--cmd)
+        --) shift
+            cmd=("$@")
             reconnect=false
+            break
+            ;;
+        -n|--no-reconnect)
+            no_reconnect=true
             ;;
         -k|--known-hosts) shift
             known_hosts_file=$1
@@ -117,17 +125,16 @@ ssh_jump(){
     ssh $SSH_OPTS -F $tmpfile target "$@"
 }
 
-if ! $reconnect; then
-    # simple connection
-    ssh_jump "$args"
-else
-    # with auto reconnect
-    if [ ${#args[@]} -gt 0 ]; then
-        echo "Warning: Discarding commands: ${args[@]}"
-        sleep 1
-    fi
-    while sleep 1; do 
-        ssh_jump -t 'tmux a || tmux; bash --login' && break
-        echo "Reconnecting in 1 second."
-    done
+if [ ${#cmd[@]} -eq 0 ]; then
+    # default command
+    cmd+=("-t")
+    cmd+=('tmux a || tmux; bash --login')
 fi
+
+period=0
+while sleep $period; do 
+    ssh_jump ${cmd[@]} && break
+    $no_reconnect && break
+    period=1
+    echo "Reconnecting in ${period}s."
+done
