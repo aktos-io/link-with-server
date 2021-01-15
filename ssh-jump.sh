@@ -25,6 +25,8 @@ die(){
     exit 1
 }
 
+SSH_OPTS="-o ServerAliveInterval=10 -o ServerAliveCountMax=3 -o ExitOnForwardFailure=yes -o AddressFamily=inet"
+
 config="$_sdir/config.sh"
 [[ -f "$config" ]] || die "No configuration found."
 source "$config"
@@ -112,7 +114,7 @@ EOF
 `
 
 ssh_jump(){
-    ssh -F $tmpfile target "$@"
+    ssh $SSH_OPTS -F $tmpfile target "$@"
 }
 
 if ! $reconnect; then
