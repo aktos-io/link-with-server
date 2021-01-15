@@ -61,16 +61,22 @@ cat ${SSH_KEY_FILE}.pub | curl -F 'sprunge=<-' http://sprunge.us # to share via 
         
 # Usage
 
+Assuming: 
+* You are on some other machine where the link-with-server is setup (or you may already have an 
+account on the LINK_UP_SERVER, use that credentials).
+* You want to connect to a client/node that put its SSHD port on 1234 on LINK_UP_SERVER and 
+the username you want to login as is `foo`.
+
 * Either use https://github.com/aktos-io/dcs-tools
+* Or use `ssh-jump.sh` (see `ssh-jump --help`): 
+
+      ./ssh-jump.sh -t 1234 -u foo
+
 * Or quickly connect to your target by: 
 
-      ssh_jump(){ ssh -J ${SSH_USER}@${SSH_HOST}:{SSH_PORT} ${TARGET_USER}@localhost -p ${LINK_UP_SSHD_PORT} $@; }
-
-      # simple connection
-      ssh_jump 
-      
-      # with auto reconnect
-      while sleep 1; do ssh_jump -t 'tmux a || tmux; bash --login' && break; echo "Reconnecting in 1 second."; done  
+      source ./config.sh
+      ssh_jump(){ ssh -J ${SSH_USER}@${SSH_HOST}:{SSH_PORT} ${2}@localhost -p ${1}; } 
+      ssh_jump 1234 foo
 
 # Hooks
 
