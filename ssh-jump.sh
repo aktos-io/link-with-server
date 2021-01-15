@@ -41,6 +41,7 @@ reconnect=true
 no_reconnect=false
 known_hosts_file=
 cmd=()
+default_cmd=true
 # ---------------------------
 args_backup=("$@")
 args=()
@@ -62,6 +63,7 @@ while [ $# -gt 0 ]; do
         --) shift
             cmd=("$@")
             reconnect=false
+            default_cmd=false
             break
             ;;
         -n|--no-reconnect)
@@ -125,8 +127,7 @@ ssh_jump(){
     ssh $SSH_OPTS -F $tmpfile target "$@"
 }
 
-if [ ${#cmd[@]} -eq 0 ]; then
-    # default command
+if $default_cmd; then
     cmd+=("-t")
     cmd+=('tmux a || tmux; bash --login')
 fi
