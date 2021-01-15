@@ -70,7 +70,7 @@ cat ${SSH_KEY_FILE}.pub | curl -F 'sprunge=<-' http://sprunge.us # to share via 
       ssh_jump 
       
       # with auto reconnect
-      while sleep 1; do ssh_jump -t 'tmux a || tmux; bash --login' && break; done  
+      while sleep 1; do ssh_jump -t 'tmux a || tmux; bash --login' && break; echo "Reconnecting in 1 second."; done  
 
 # Hooks
 
