@@ -4,17 +4,17 @@ _sdir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 show_help(){
     cat <<HELP
 
-    $(basename $0) [options] -t PORT -u USER [-- [commands]]
+    $(basename $0) [options] -t PORT [-u USER] [-- [commands]]
 
     Reconnects if connection drops. (Requires Tmux on the remote side.)
 
     Options:
 
         -t TARGET_PORT       : Target's SSHD port on rendezvous server.
-        -u USER              : Username to use while logging in to the target.
-        -- [commands]        : Do not reconnect, make a simple connection.
+        -u USER              : Username on the target. Defaults to \$USER
         -k, --known-hosts    : Path to known_hosts file.
         -n, --no-reconnect   : Do not try to reconnect
+        -- [commands]        : Use custom commands instead of a Tmux session.
 
 HELP
 }
@@ -35,7 +35,7 @@ source "$config"
 # Parse command line arguments
 # ---------------------------
 # Initialize parameters
-target_user=
+target_user=$USER
 target_port=
 reconnect=true
 no_reconnect=false
