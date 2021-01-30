@@ -8,7 +8,7 @@ Creates a link between the CLIENT and the LINK UP SERVER.
 # Setup SSH Server on Server Side (for the first time)
 
 1. Install OpenSSH server if not installed.
-2. **Recommended**:
+2. **Recommended** (or you can use an existing account for this purpose):
     1. Create a standard Unix user account (eg. `adduser lws`) to manage the connections.
     2. Add following section to `/etc/ssh/sshd_config` file:
         
@@ -37,27 +37,12 @@ Creates a link between the CLIENT and the LINK UP SERVER.
 sudo apt install netcat
 git clone --recursive https://github.com/aktos-io/link-with-server
 cd link-with-server
-cp config.sh{.sample,}
-nano config.sh
+cp config.sh{.sample,} && nano config.sh  # edit accordingly
 ./gen-private-key-if-necessary.sh 
-# Send your public key to your server *manually* incase of a MITM attack. 
-cat ${SSH_KEY_FILE}.pub  # send it via e-mail, or: 
-cat ${SSH_KEY_FILE}.pub | curl -F 'sprunge=<-' http://sprunge.us # to share via an external service.
-# Insert the line public key contents into /home/lws/your-authorized-keys-file 
-./link-with-server.sh --test && \
-    ./register-to-boot.sh
-# Enable and trigger first run
-./watch-logs.sh
+./send-public-key.sh
+./link-with-server.sh --test && ./register-to-boot.sh # or run manually: ./link-with-server.sh
+./watch-logs.sh monitor
 ```
-
-1. Clone this repository. 
-2. Create `config.sh` (see `config.sh.sample`)
-3. Create public/private key pair if necessary.
-4. Append your CLIENT's public key to the `authorized_keys` file on your LINK_UP_SERVER. 
-5. Test your connectivity with simply running `./link-with-server.sh --test`.
-6. Start `./link-with-server.sh` as a long running application, by using `./register-to-boot.sh` or: 
-
-        nohup ./link-with-server.sh & ; exit 
         
 # Usage
 
