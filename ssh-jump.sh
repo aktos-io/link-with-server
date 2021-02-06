@@ -10,11 +10,12 @@ show_help(){
 
     Options:
 
-        -t TARGET_PORT       : Target's SSHD port on rendezvous server.
-        -u USER              : Username on the target. Defaults to \$USER
-        -k, --known-hosts    : Path to known_hosts file.
-        -n, --no-reconnect   : Do not try to reconnect
-        -- [commands]        : Use custom commands instead of a Tmux session.
+        -t TARGET_PORT          : Target's SSHD port on rendezvous server.
+        -u USER                 : Username on the target. Defaults to \$USER
+        -k, --known-hosts FILE  : Path to known_hosts file.
+        -n, --no-reconnect      : Do not try to reconnect
+        -- [commands]           : Use custom commands instead of a Tmux session.
+        -c, --config FILE       : Alternative config file (default: ./config.sh)
 
 HELP
 }
@@ -28,10 +29,6 @@ die(){
 
 SSH_OPTS="-o ServerAliveInterval=10 -o ServerAliveCountMax=3 -o ExitOnForwardFailure=yes -o AddressFamily=inet"
 
-config="$_sdir/config.sh"
-[[ -f "$config" ]] || die "No configuration found."
-source "$config"
-
 # Parse command line arguments
 # ---------------------------
 # Initialize parameters
@@ -42,6 +39,7 @@ no_reconnect=false
 known_hosts_file=
 cmd=()
 default_cmd=true
+config="$_sdir/config.sh"
 # ---------------------------
 args_backup=("$@")
 args=()
@@ -72,6 +70,9 @@ while [ $# -gt 0 ]; do
         -k|--known-hosts) shift
             known_hosts_file=$1
             ;;
+        -c|--config) shift 
+            config="$1"
+            ;;
         # --------------------------------------------------------
         -*) # Handle unrecognized options
             die "Unknown option: $1"
@@ -89,6 +90,9 @@ done; set -- "${args_backup[@]}"
 # Use $arg1 in place of $1, $arg2 in place of $2 and so on, 
 # "$@" is in the original state,
 # use ${args[@]} for new positional arguments  
+
+[[ -f "$config" ]] || die "No configuration found."
+source "$config"
 
 [[ -z "$target_user" ]] && die "Target user missing."
 [[ -z "$target_port" ]] && die "Target port missing."
