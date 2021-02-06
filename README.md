@@ -8,9 +8,12 @@ Creates a link between the CLIENT and the LINK UP SERVER.
 # Setup SSH Server on Server Side (for the first time)
 
 1. Install OpenSSH server if not installed.
-2. **Recommended** (or you can use an existing account for this purpose):
-    1. Create a standard Unix user account (eg. `adduser lws`) to manage the connections.
-    2. Add following section to `/etc/ssh/sshd_config` file:
+2. You may use an existing user account on the server side. However, setting up a new account is **recommended**:
+    1. Create a standard user account: 
+    
+           adduser lws
+           
+    2. Add the following section to `/etc/ssh/sshd_config`:
         
             Match User lws
                     AllowTcpForwarding yes
@@ -22,8 +25,10 @@ Creates a link between the CLIENT and the LINK UP SERVER.
     3. Create your handler script: `/home/lws/handler.sh` (don't forget to make it executable):
 
        ```bash
-       #/bin/bash
-       echo "original command was $SSH_ORIGINAL_COMMAND"
+       #!/bin/bash
+       # This message will appear on the client side when the client 
+       # tries to login to interactive shell:
+       echo "ERROR: No shell access is allowed. Original command was: $SSH_ORIGINAL_COMMAND" 
        ```
 
     3. Restart sshd on server:
@@ -39,29 +44,27 @@ git clone --recursive https://github.com/aktos-io/link-with-server
 cd link-with-server
 cp config.sh{.sample,} && nano config.sh  # edit accordingly
 ./gen-private-key-if-necessary.sh 
-./send-public-key.sh
+./send-public-key.sh  # and follow the instructions 
 ./link-with-server.sh --test && ./register-to-boot.sh # or run manually: ./link-with-server.sh
-./watch-logs.sh monitor
+./watch-logs.sh
 ```
         
 # Usage
 
 Assuming: 
-* You are on some other machine where the link-with-server is setup (or you may already have an 
-account on the LINK_UP_SERVER, use that credentials).
-* You want to connect to a client/node that put its SSHD port on 1234 on LINK_UP_SERVER and 
-the username you want to login as is `foo`.
+1. You have SSH access to the LINK_UP_SERVER 
+2. You want to connect to a client/node (`AAA`) that has put its SSHD port on `LINK_UP_SERVER:1234` and the username is `foo`.
 
-* Either use https://github.com/aktos-io/dcs-tools
-* Or use `ssh-jump.sh` (see `ssh-jump --help`): 
+You can connect to `foo@AAA` from anywhere by:
+* Either using https://github.com/aktos-io/dcs-tools (provides advanced backup and management tools)
+* Or using `link-with-server/ssh-jump.sh`:
 
       ./ssh-jump.sh -t 1234 -u foo
 
-* Or quickly connect to your target by: 
+* Or with the following one liner without any dependencies: 
 
-      source ./config.sh
-      ssh_jump(){ ssh -J ${SSH_USER}@${SSH_HOST}:{SSH_PORT} ${2}@localhost -p ${1}; } 
-      ssh_jump 1234 foo
+      # assuming you would normally connect to LINK_UP_SERVER by `ssh myuser@11.22.33.44 -p 2255`
+      ssh_jump(){ ssh -J myuser@11.22.33.44:2255 ${2}@localhost -p ${1}; }; ssh_jump 1234 foo
 
 # Hooks
 
