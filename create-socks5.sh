@@ -101,21 +101,27 @@ ssh_cmd(){
     ssh $SSH_OPTS -F $tmpfile LINK_UP_SERVER $@
 }
 
+is_pid_alive(){
+    kill -s 0 $1 2> /dev/null
+}
+
 period=0
 while sleep $period; do 
     ssh_cmd -C2qTnN -D $proxy_port &
+    ssh_pid=$!
     sleep 1
     curr_ip=$(curl ifconfig.me -s)
-    for i in `seq 10`; do
-        new_ip=$(timeout 5 curl --socks5 localhost:$proxy_port ifconfig.me -s)
+    while :; do
+        new_ip=$(timeout 10 curl --socks5 localhost:$proxy_port ifconfig.me -s)
         [[ -n $new_ip ]] && break
-        echo "Retrying to get an ip address."
+        is_pid_alive $ssh_pid || break 
+        echo "Waiting to get an ip address."
         sleep 2
     done
     if [[ -n $new_ip && $curr_ip != $new_ip ]]; then 
         echo "Socks proxy is working. New ip is: $new_ip".
     fi
-    wait
+    wait $ssh_pid
     period=1
     echo "Reconnecting in ${period}s."
 done
