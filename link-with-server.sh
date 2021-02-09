@@ -77,7 +77,7 @@ while [ $# -gt 0 ]; do
     esac
     shift
     [[ -z ${1:-} ]] && break
-done; set -- "${args_backup[@]}"
+done; set -- "${args_backup[@]-}"
 # Use $arg1 in place of $1, $arg2 in place of $2 and so on, 
 # "$@" is in the original state,
 # use ${args[@]} for new positional arguments  
