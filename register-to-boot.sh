@@ -29,15 +29,14 @@ echo "----------------------------------------"
 
 chmod 644 $service_file
 
+echo "Enabling $name.service to run on boot"
+sudo systemctl enable $name
+
 cat << EOL
 
-To start service:
+To trigger $name.service manually:
 
 	sudo systemctl start $name
-
-Enable on every boot:
-
-	sudo systemctl enable $name
 
 EOL
 
