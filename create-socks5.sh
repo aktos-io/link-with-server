@@ -82,8 +82,13 @@ tmpfile=$(mktemp /tmp/$(basename $0).XXXXXX)
 
 cleanup(){
     rm $tmpfile
+    ssh_pid=$(netstat -anp 2> /dev/null | grep $proxy_port | grep LISTEN | awk '{print $7}' | cut -d/ -f 1)
+    if [[ -n "$ssh_pid" ]]; then
+        echo "Killing SSH process: $ssh_pid"
+        kill $ssh_pid
+    fi
 }
-trap cleanup EXIT
+trap cleanup EXIT INT
 
 ssh_config=`cat << EOF > $tmpfile
 Host *
