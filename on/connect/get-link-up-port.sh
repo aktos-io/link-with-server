@@ -1,5 +1,4 @@
-public_key=$(get_public_key $SSH_KEY_FILE)
-curr_fingerprint=$(get_fingerprint $public_key)
+curr_fingerprint=$(get_fingerprint $SSH_KEY_FILE)
 
 echo_stamp "Asking link up port for: $curr_fingerprint"
 link_up_port=$(ssh_run_cmd $curr_fingerprint)
